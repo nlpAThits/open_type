@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 from model_utils import sort_batch_by_length, SelfAttentiveSum, SimpleDecoder, MultiSimpleDecoder, CNN
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+from IPython import embed
 
 sys.path.insert(0, './resources')
 import constant
@@ -47,9 +48,8 @@ class Model(nn.Module):
 
   def sorted_rnn(self, sequences, sequence_lengths, rnn):
     sorted_inputs, sorted_sequence_lengths, restoration_indices = sort_batch_by_length(sequences, sequence_lengths)
-    packed_sequence_input = pack_padded_sequence(sorted_inputs,
-                                                 sorted_sequence_lengths.data.tolist(),
-                                                 batch_first=True)
+    #embed()
+    packed_sequence_input = pack_padded_sequence(sorted_inputs, sorted_sequence_lengths.long().data.tolist(), batch_first=True)
     packed_sequence_output, _ = rnn(packed_sequence_input, None)
     unpacked_sequence_tensor, _ = pad_packed_sequence(packed_sequence_output, batch_first=True)
     return unpacked_sequence_tensor.index_select(0, restoration_indices)

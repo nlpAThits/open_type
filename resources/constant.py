@@ -11,6 +11,7 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
       file_content = dict(zip(text, range(0, len(text))))
   return file_content
 
+
 FILE_ROOT = '/hits/fast/nlp/lopezfo/data/ultrafined_acl18/release/'
 GLOVE_VEC = '/hits/fast/nlp/lopezfo/data/word_embeddings/glove.840B.300d.txt'
 EXP_ROOT = '/hits/fast/nlp/lopezfo/out/open_type/pytorch/'
