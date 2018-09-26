@@ -11,9 +11,9 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
       file_content = dict(zip(text, range(0, len(text))))
   return file_content
 
-FILE_ROOT = '/home/eunsol/Data/entity_type_data/release/'
-GLOVE_VEC = '/home/eunsol/Data/pretrainedVector/glove.840B.300d.txt'
-EXP_ROOT = '/home/eunsol/Experiment/pytorch/'
+FILE_ROOT = '/hits/fast/nlp/lopezfo/data/ultrafined_acl18/release/'
+GLOVE_VEC = '/hits/fast/nlp/lopezfo/data/word_embeddings/glove.840B.300d.txt'
+EXP_ROOT = '/hits/fast/nlp/lopezfo/out/open_type/pytorch/'
 
 ANSWER_NUM_DICT = {"open": 10331, "onto":89, "wiki": 4600, "kb":130, "gen":9}
 

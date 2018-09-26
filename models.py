@@ -68,7 +68,9 @@ class Model(nn.Module):
     else:
       gen_cutoff, fine_cutoff, final_cutoff = constant.ANSWER_NUM_DICT['gen'], constant.ANSWER_NUM_DICT['kb'], None
     loss = 0.0
-    comparison_tensor = torch.Tensor([1.0]).cuda()
+    comparison_tensor = torch.Tensor([1.0])
+    if torch.cuda.is_available():
+      comparison_tensor = comparison_tensor.cuda()
     gen_targets = targets[:, :gen_cutoff]
     fine_targets = targets[:, gen_cutoff:fine_cutoff]
     gen_target_sum = torch.sum(gen_targets, 1)

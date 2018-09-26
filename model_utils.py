@@ -103,8 +103,10 @@ class MultiSimpleDecoder(nn.Module):
 
   def __init__(self, output_dim):
     super(MultiSimpleDecoder, self).__init__()
-    self.linear = nn.Linear(output_dim, constant.ANSWER_NUM_DICT['open'],
-                            bias=False).cuda()  # (out_features x in_features)
+    self.linear = nn.Linear(output_dim, constant.ANSWER_NUM_DICT['open'], bias=False)  # (out_features x in_features)
+    if torch.cuda.is_available():
+      self.linear = self.linear.cuda()
+
 
   def forward(self, inputs, output_type):
     if output_type == "open":
