@@ -63,7 +63,7 @@ def get_joint_datasets(args):
     if not args.remove_open and not args.only_crowd:
       train_gen_list.append(
         #`("open", get_data_gen('train/open*.json', 'train', args, vocab, "open")))
-        ("open", get_data_gen('distant_supervision/headwords.json', 'train', args, vocab, "open")))
+        ("open", get_data_gen('distant_supervision/headword_train.json', 'train', args, vocab, "open")))
       valid_gen_list.append(("open", get_data_gen('distant_supervision/headword_dev.json', 'dev', args, vocab, "open")))
     if not args.remove_el and not args.only_crowd:
       valid_gen_list.append(
