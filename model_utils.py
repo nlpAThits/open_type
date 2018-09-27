@@ -21,7 +21,7 @@ def get_eval_string(true_prediction, val_type_name):
   output_str = "Eval: {0} {1} {2:.3f} P:{3:.3f} R:{4:.3f} F1:{5:.3f} Ma_P:{6:.3f} Ma_R:{7:.3f} Ma_F1:{8:.3f}".format(
     count, pred_count, avg_pred_count, p, r, f1, ma_p, ma_r, ma_f1)
   accuracy = sum([set(y) == set(yp) for y, yp in true_prediction]) * 1.0 / len(true_prediction)
-  output_str += '\t {} accuracy: {0:.1f}%'.format(val_type_name, accuracy * 100)
+  output_str += '\t {} accuracy: {:.1f}%'.format(val_type_name, accuracy * 100)
   return output_str
 
 
