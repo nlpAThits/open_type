@@ -35,6 +35,43 @@ def get_figet_evaluation_str(true_prediction):
   return res
 
 
+def eval_stratified(true_prediction):
+  coarse_true_and_predictions = []
+  fine_true_and_predictions = []
+  ultrafine_true_and_predictions = []
+
+  for true_labels, predicted_labels in true_prediction:
+    coarse_gold, fine_gold, ultrafine_gold = stratify(true_labels)
+    coarse_pred, fine_pred, ultrafine_pred = stratify(predicted_labels)
+    coarse_true_and_predictions.append((coarse_gold, coarse_pred))
+    fine_true_and_predictions.append((fine_gold, fine_pred))
+    ultrafine_true_and_predictions.append((ultrafine_gold, ultrafine_pred))
+
+  titles = ["Coarse", "Fine", "Ultrafine"]
+  i = 0
+  for true_and_predictions in [coarse_true_and_predictions, fine_true_and_predictions, ultrafine_true_and_predictions]:
+    result = get_figet_evaluation_str(true_and_predictions)
+    print(titles[i])
+    print(result)
+    i += 1
+
+
+def stratify(labels):
+  """
+  Divide label into three categories.
+  """
+  id2label = constant.ID2ANS_DICT["open"]
+  coarse_ids = range(0, constant.ANSWER_NUM_DICT["gen"])
+  fine_ids = range(constant.ANSWER_NUM_DICT["gen"], constant.ANSWER_NUM_DICT["kb"])
+
+  coarse = set([id2label[idx] for idx in coarse_ids])
+  fine = set([id2label[idx] for idx in fine_ids])
+
+  return ([l for l in labels if l in coarse],
+          [l for l in labels if ((l in fine) and (l not in coarse))],
+          [l for l in labels if (l not in coarse) and (l not in fine)])
+
+
 def get_output_index(outputs):
   """
   Given outputs from the decoder, generate prediction index.

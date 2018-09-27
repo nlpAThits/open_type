@@ -13,7 +13,7 @@ import data_utils
 import models
 from data_utils import to_torch
 from eval_metric import mrr
-from model_utils import get_gold_pred_str, get_eval_string, get_output_index, get_figet_evaluation_str
+from model_utils import get_gold_pred_str, get_eval_string, get_output_index, get_figet_evaluation_str, eval_stratified
 from tensorboardX import SummaryWriter
 from torch import optim
 
@@ -160,18 +160,33 @@ def _train(args):
 
     # Evaluate Loss on the Turk Dev dataset.
     if batch_num % args.eval_period == 0 and batch_num > 0 and args.data_setup == 'joint':
-      print('---- eval at step {0:d} ---'.format(batch_num))
+      print('---- Eval on Dev at step {0:d} ---'.format(batch_num))
       feed_dict = next(crowd_dev_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
-      crowd_eval_loss = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+      gold_and_pred_dev = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+
+      figet_eval = get_figet_evaluation_str(gold_and_pred_dev)
+      print("\nFiget Total Evaluation on Dev for {}\n{}\n".format(args.goal, figet_eval))
+
+      print("Evaluate stratified:")
+      eval_stratified(gold_and_pred_dev)
+      print("\n")
+
 
     # Evaluate on TEST
     if batch_num % args.eval_period * 10 == 0 and batch_num > 0 and args.data_setup == 'joint':
-      # Evaluate Loss on the Turk Dev dataset.
       print('---- Eval on Test at step {0:d} ---'.format(batch_num))
       feed_dict = next(crowd_test_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
-      crowd_eval_loss = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+      gold_and_pred_test = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+
+      figet_eval = get_figet_evaluation_str(gold_and_pred_test)
+      print("\nFiget Total Evaluation on Test for {}\n{}\n".format(args.goal, figet_eval))
+
+      print("Evaluate stratified:")
+      eval_stratified(gold_and_pred_test)
+      print("\n")
+
 
     if batch_num % args.save_period == 0 and batch_num > 0:
       save_fname = '{0:s}/{1:s}_{2:d}.pt'.format(constant.EXP_ROOT, args.model_id, batch_num)
@@ -197,13 +212,10 @@ def evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, goa
   print(val_type_name + ":" +eval_loss_str)
   print(val_type_name+":"+ eval_str)
 
-  figet_eval = get_figet_evaluation_str(gold_pred)
-  print("\nFiget Evaluation on {} for {}\n{}\n\n".format(val_type_name, goal, figet_eval))
-
   logging.info(val_type_name + ":" + eval_loss_str)
   logging.info(val_type_name +":" +  eval_str)
   model.train()
-  return eval_loss
+  return gold_pred
 
 
 def load_model(reload_model_name, save_dir, model_id, model, optimizer=None):
