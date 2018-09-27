@@ -12,7 +12,7 @@ import constant
 sigmoid_fn = nn.Sigmoid()
 
 
-def get_eval_string(true_prediction):
+def get_eval_string(true_prediction, val_type_name):
   """
   Given a list of (gold, prediction)s, generate output string.
   """
@@ -21,14 +21,25 @@ def get_eval_string(true_prediction):
   output_str = "Eval: {0} {1} {2:.3f} P:{3:.3f} R:{4:.3f} F1:{5:.3f} Ma_P:{6:.3f} Ma_R:{7:.3f} Ma_F1:{8:.3f}".format(
     count, pred_count, avg_pred_count, p, r, f1, ma_p, ma_r, ma_f1)
   accuracy = sum([set(y) == set(yp) for y, yp in true_prediction]) * 1.0 / len(true_prediction)
-  output_str += '\t Dev accuracy: {0:.1f}%'.format(accuracy * 100)
+  output_str += '\t {} accuracy: {0:.1f}%'.format(val_type_name, accuracy * 100)
   return output_str
+
+
+def get_figet_evaluation_str(true_prediction):
+  _, _, strict_f1 = eval_metric.strict(true_prediction)
+  _, _, _, ma_p, ma_r, ma_f1 = eval_metric.macro(true_prediction)
+  _, _, _, mi_p, mi_r, mi_f1 = eval_metric.micro(true_prediction)
+  res = "%.2f\t%.2f\t%.2f\t" % (strict_f1 * 100, strict_f1 * 100, strict_f1 * 100)
+  res += "%.2f\t%.2f\t%.2f\t" % (ma_p * 100, ma_r * 100, ma_f1 * 100)
+  res += "%.2f\t%.2f\t%.2f\t" % (mi_p * 100, mi_r * 100, mi_f1 * 100)
+  return res
+
 
 def get_output_index(outputs):
   """
   Given outputs from the decoder, generate prediction index.
-  :param outputs:
-  :return:
+  :param outputs: batch x type_amount
+  :return: pred_idx <list>: of len 'batch' with the ids of the predicted types
   """
   pred_idx = []
   outputs = sigmoid_fn(outputs).data.cpu().clone()
@@ -54,6 +65,7 @@ def get_gold_pred_str(pred_idx, gold, goal):
   for pred_idx1 in pred_idx:
     pred_strs.append([(id2word_dict[ind]) for ind in pred_idx1])
   return list(zip(gold_strs, pred_strs))
+
 
 def sort_batch_by_length(tensor: torch.autograd.Variable, sequence_lengths: torch.autograd.Variable):
   """

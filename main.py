@@ -13,7 +13,7 @@ import data_utils
 import models
 from data_utils import to_torch
 from eval_metric import mrr
-from model_utils import get_gold_pred_str, get_eval_string, get_output_index
+from model_utils import get_gold_pred_str, get_eval_string, get_output_index, get_figet_evaluation_str
 from tensorboardX import SummaryWriter
 from torch import optim
 
@@ -77,7 +77,8 @@ def get_joint_datasets(args):
       train_gen_list.append(
         ("open", get_data_gen('crowd/train_m.json', 'train', args, vocab, "open")))
   crowd_dev_gen = get_data_gen('crowd/dev.json', 'dev', args, vocab, "open")
-  return train_gen_list, valid_gen_list, crowd_dev_gen
+  crowd_test_gen = get_data_gen('crowd/test.json', 'dev', args, vocab, "open")
+  return train_gen_list, valid_gen_list, crowd_dev_gen, crowd_test_gen
 
 
 def get_datasets(data_lists, args):
@@ -90,7 +91,7 @@ def get_datasets(data_lists, args):
 
 def _train(args):
   if args.data_setup == 'joint':
-    train_gen_list, val_gen_list, crowd_dev_gen = get_joint_datasets(args)
+    train_gen_list, val_gen_list, crowd_dev_gen, crowd_test_gen = get_joint_datasets(args)
   else:
     train_fname = args.train_data
     dev_fname = args.dev_data
@@ -156,20 +157,28 @@ def _train(args):
           if val_type_name == type_name:
             eval_batch, _ = to_torch(next(val_data_gen))
             evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, args.goal)
-    
+
+    # Evaluate Loss on the Turk Dev dataset.
     if batch_num % args.eval_period == 0 and batch_num > 0 and args.data_setup == 'joint':
-      # Evaluate Loss on the Turk Dev dataset.
       print('---- eval at step {0:d} ---'.format(batch_num))
-      feed_dict = next(crowd_dev_gen)
+      feed_dict = next(crowd_dev_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
       crowd_eval_loss = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
-    
+
+    # Evaluate on TEST
+    if batch_num % args.eval_period * 10 == 0 and batch_num > 0 and args.data_setup == 'joint':
+      # Evaluate Loss on the Turk Dev dataset.
+      print('---- Eval on Test at step {0:d} ---'.format(batch_num))
+      feed_dict = next(crowd_test_gen)   # batch size == full crowd dev set
+      eval_batch, _ = to_torch(feed_dict)
+      crowd_eval_loss = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+
     if batch_num % args.save_period == 0 and batch_num > 0:
       save_fname = '{0:s}/{1:s}_{2:d}.pt'.format(constant.EXP_ROOT, args.model_id, batch_num)
       torch.save({'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()}, save_fname)
-      print(
-        'Total {0:.2f} minutes have passed, saving at {1:s} '.format((time.time() - init_time) / 60, save_fname))
-  # Training finished! 
+      print('Total {0:.2f} minutes have passed, saving at {1:s} '.format((time.time() - init_time) / 60, save_fname))
+
+  # Training finished!
   torch.save({'state_dict': model.state_dict(), 'optimizer': optimizer.state_dict()},
              '{0:s}/{1:s}.pt'.format(constant.EXP_ROOT, args.model_id))
 
@@ -180,14 +189,17 @@ def evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, goa
   output_index = get_output_index(output_logits)
   eval_loss = loss.data.cpu().clone()[0]
   eval_loss_str = 'Eval loss: {0:.7f} at step {1:d}'.format(eval_loss, batch_num)
-  gold_pred = get_gold_pred_str(output_index, eval_batch['y'].data.cpu().clone(), goal)
+  gold_pred = get_gold_pred_str(output_index, eval_batch['y'].data.cpu().clone(), goal) # list of strings with [(list_of_pred_types, list_of_gold_types)]
   eval_accu = sum([set(y) == set(yp) for y, yp in gold_pred]) * 1.0 / len(gold_pred)
   tensorboard.add_validation_scalar('eval_acc_' + val_type_name, eval_accu, batch_num)
   tensorboard.add_validation_scalar('eval_loss_' + val_type_name, eval_loss, batch_num)
-  eval_str = get_eval_string(gold_pred)
+  eval_str = get_eval_string(gold_pred, val_type_name)
   print(val_type_name + ":" +eval_loss_str)
-  print(gold_pred[:3])
   print(val_type_name+":"+ eval_str)
+
+  figet_eval = get_figet_evaluation_str(gold_pred)
+  print("\nFiget Evaluation on {} for {}\n{}\n\n".format(val_type_name, goal, figet_eval))
+
   logging.info(val_type_name + ":" + eval_loss_str)
   logging.info(val_type_name +":" +  eval_str)
   model.train()
@@ -255,7 +267,7 @@ def _test(args):
       for a_id, (gold, pred) in zip(total_annot_ids, total_gold_pred):
         output_dict[a_id] = {"gold": gold, "pred": pred}
       json.dump(output_dict, f_out)
-    eval_str = get_eval_string(total_gold_pred)
+    eval_str = get_eval_string(total_gold_pred, "test")
     print(eval_str)
     logging.info('processing: ' + name)
     logging.info(eval_str)
