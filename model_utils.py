@@ -8,6 +8,7 @@ from torch.autograd import Variable
 import eval_metric
 sys.path.insert(0, './resources')
 import constant
+import logging
 
 sigmoid_fn = nn.Sigmoid()
 
@@ -36,6 +37,7 @@ def get_figet_evaluation_str(true_prediction):
 
 
 def eval_stratified(true_prediction):
+  log = get_logging()
   coarse_true_and_predictions = []
   fine_true_and_predictions = []
   ultrafine_true_and_predictions = []
@@ -51,8 +53,8 @@ def eval_stratified(true_prediction):
   i = 0
   for true_and_predictions in [coarse_true_and_predictions, fine_true_and_predictions, ultrafine_true_and_predictions]:
     result = get_figet_evaluation_str(true_and_predictions)
-    print(titles[i])
-    print(result)
+    log.info(titles[i])
+    log.info(result)
     i += 1
 
 
@@ -216,3 +218,15 @@ class SelfAttentiveSum(nn.Module):
     weighted_keys = self.key_softmax(k).view(input_embed.size()[0], -1, 1)
     weighted_values = torch.sum(weighted_keys * input_embed, 1)  # batch_size, seq_length, embed_dim
     return weighted_values, weighted_keys
+
+
+def get_logging(level=logging.DEBUG):
+    log = logging.getLogger(__name__)
+    if log.handlers:
+        return log
+    log.setLevel(level)
+    ch = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(fmt='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
+    ch.setFormatter(formatter)
+    log.addHandler(ch)
+    return log

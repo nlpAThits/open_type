@@ -13,12 +13,14 @@ import data_utils
 import models
 from data_utils import to_torch
 from eval_metric import mrr
-from model_utils import get_gold_pred_str, get_eval_string, get_output_index, get_figet_evaluation_str, eval_stratified
+from model_utils import get_gold_pred_str, get_eval_string, get_output_index, get_figet_evaluation_str, eval_stratified, get_logging
 from tensorboardX import SummaryWriter
 from torch import optim
 
 sys.path.insert(0, './resources')
 import config_parser, constant, eval_metric
+
+mylog = get_logging()
 
 
 class TensorboardWriter:
@@ -160,32 +162,31 @@ def _train(args):
 
     # Evaluate Loss on the Turk Dev dataset.
     if batch_num % args.eval_period == 0 and batch_num > 0 and args.data_setup == 'joint':
-      print('---- Eval on Dev at step {0:d} ---'.format(batch_num))
+
+      mylog.info('---- Eval on Dev at step {0:d} ---'.format(batch_num))
       feed_dict = next(crowd_dev_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
       gold_and_pred_dev = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
 
       figet_eval = get_figet_evaluation_str(gold_and_pred_dev)
-      print("\nFiget Total Evaluation on Dev for {}\n{}\n".format(args.goal, figet_eval))
+      mylog.info("\nFiget Total Evaluation on Dev for {}\n{}\n".format(args.goal, figet_eval))
 
-      print("Evaluate stratified:")
+      mylog.info("Evaluate stratified:")
       eval_stratified(gold_and_pred_dev)
-      print("\n")
 
 
     # Evaluate on TEST
     if batch_num % args.eval_period * 10 == 0 and batch_num > 0 and args.data_setup == 'joint':
-      print('---- Eval on Test at step {0:d} ---'.format(batch_num))
+      mylog.info('---- Eval on Test at step {0:d} ---'.format(batch_num))
       feed_dict = next(crowd_test_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
       gold_and_pred_test = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
 
       figet_eval = get_figet_evaluation_str(gold_and_pred_test)
-      print("\nFiget Total Evaluation on Test for {}\n{}\n".format(args.goal, figet_eval))
+      mylog.info("\nFiget Total Evaluation on Test for {}\n{}\n".format(args.goal, figet_eval))
 
-      print("Evaluate stratified:")
+      mylog.info("Evaluate stratified:")
       eval_stratified(gold_and_pred_test)
-      print("\n")
 
 
     if batch_num % args.save_period == 0 and batch_num > 0:
