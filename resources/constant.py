@@ -12,11 +12,14 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
   return file_content
 
 FILE_ROOT = '/hits/basement/nlp/lopezfo/data/ultrafine/release/'
-GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/glove.840B.300d.txt'
+# GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/glove.840B.300d.txt'
+GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/fooglove.txt'
 EXP_ROOT = '/hits/basement/nlp/lopezfo/out/opentype/'
 
 ANSWER_NUM_DICT = {"open": 10331, "onto":89, "wiki": 4600, "kb":130, "gen":9}
 
+# WARNING! The type file has to be ordered following the hierarchy:
+# [ General types : Fine types : Ultra-fined types ]
 KB_VOCAB = load_vocab_dict(FILE_ROOT + "/ontology/types.txt", 130)
 WIKI_VOCAB = load_vocab_dict(FILE_ROOT + "/ontology/types.txt", 4600)
 ANSWER_VOCAB = load_vocab_dict(FILE_ROOT + "/ontology/types.txt")

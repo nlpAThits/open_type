@@ -74,16 +74,17 @@ class Model(nn.Module):
     gen_target_sum = torch.sum(gen_targets, 1)
     fine_target_sum = torch.sum(fine_targets, 1)
     
-    if torch.sum(gen_target_sum.data) > 0:
+    if torch.sum(gen_target_sum.data) > 0:  # Calculates the loss for the general
+
       gen_mask = torch.squeeze(torch.nonzero(torch.min(gen_target_sum.data, comparison_tensor)), dim=1)
       gen_logit_masked = logits[:, :gen_cutoff][gen_mask, :]
-      gen_target_masked = gen_targets.index_select(0, gen_mask)
+      gen_target_masked = gen_targets[gen_mask]
       gen_loss = self.loss_func(gen_logit_masked, gen_target_masked)
       loss += gen_loss 
     if torch.sum(fine_target_sum.data) > 0:
       fine_mask = torch.squeeze(torch.nonzero(torch.min(fine_target_sum.data, comparison_tensor)), dim=1)
       fine_logit_masked = logits[:,gen_cutoff:fine_cutoff][fine_mask, :]
-      fine_target_masked = fine_targets.index_select(0, fine_mask)
+      fine_target_masked = fine_targets[fine_mask]
       fine_loss = self.loss_func(fine_logit_masked, fine_target_masked)
       loss += fine_loss 
 
@@ -96,7 +97,7 @@ class Model(nn.Module):
         finer_targets = targets[:, fine_cutoff:]
       if torch.sum(torch.sum(finer_targets, 1).data) >0:
         finer_mask = torch.squeeze(torch.nonzero(torch.min(torch.sum(finer_targets, 1).data, comparison_tensor)), dim=1)
-        finer_target_masked = finer_targets.index_select(0, finer_mask)
+        finer_target_masked = finer_targets[finer_mask]
         logit_masked = logit_masked[finer_mask, :]
         layer_loss = self.loss_func(logit_masked, finer_target_masked)
         loss += layer_loss
