@@ -11,7 +11,7 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
       file_content = dict(zip(text, range(0, len(text))))
   return file_content
 
-FILE_ROOT = '/hits/basement/nlp/lopezfo/data/ultrafine/release/'
+FILE_ROOT = '/hits/basement/nlp/lopezfo/views/ok_ultra_for_opentype/'
 TYPE_ROOT = '/home/lopezfo/projects/open_type/resources/'
 # GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/glove.840B.300d.txt'
 GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/fooglove.txt'
@@ -24,7 +24,7 @@ ANSWER_NUM_DICT = {"open": 2323, "onto":89, "wiki": 4600, "kb":120, "gen":8}
 KB_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt", 120)
 WIKI_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt", 4600)
 ANSWER_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt")
-ONTO_ANS_VOCAB = load_vocab_dict(FILE_ROOT + '/ontology/onto_ontology.txt')
+ONTO_ANS_VOCAB = load_vocab_dict('/hits/basement/nlp/lopezfo/data/ultrafine/release/ontology/onto_ontology.txt')
 ANS2ID_DICT = {"open": ANSWER_VOCAB, "wiki": WIKI_VOCAB, "kb": KB_VOCAB, "onto":ONTO_ANS_VOCAB}
 
 open_id2ans = {v: k for k, v in ANSWER_VOCAB.items()}
