@@ -12,17 +12,18 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
   return file_content
 
 FILE_ROOT = '/hits/basement/nlp/lopezfo/data/ultrafine/release/'
+TYPE_ROOT = '/home/lopezfo/projects/open_type/resources/'
 # GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/glove.840B.300d.txt'
 GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/fooglove.txt'
 EXP_ROOT = '/hits/basement/nlp/lopezfo/out/opentype/'
 
-ANSWER_NUM_DICT = {"open": 10331, "onto":89, "wiki": 4600, "kb":130, "gen":9}
+ANSWER_NUM_DICT = {"open": 2339, "onto":89, "wiki": 4600, "kb":120, "gen":8}
 
 # WARNING! The type file has to be ordered following the hierarchy:
 # [ General types : Fine types : Ultra-fined types ]
-KB_VOCAB = load_vocab_dict(FILE_ROOT + "/ontology/types.txt", 130)
-WIKI_VOCAB = load_vocab_dict(FILE_ROOT + "/ontology/types.txt", 4600)
-ANSWER_VOCAB = load_vocab_dict(FILE_ROOT + "/ontology/types.txt")
+KB_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt", 120)
+WIKI_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt", 4600)
+ANSWER_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt")
 ONTO_ANS_VOCAB = load_vocab_dict(FILE_ROOT + '/ontology/onto_ontology.txt')
 ANS2ID_DICT = {"open": ANSWER_VOCAB, "wiki": WIKI_VOCAB, "kb": KB_VOCAB, "onto":ONTO_ANS_VOCAB}
 

@@ -6,8 +6,8 @@ def stratify(all_labels, types):
   """
   Divide label into three categories.
   """
-  coarse = types[:9]
-  fine = types[9:130]
+  coarse = types[:8]
+  fine = types[8:120]
   return ([l for l in all_labels if l in coarse],
           [l for l in all_labels if ((l in fine) and (not l in coarse))],
           [l for l in all_labels if (not l in coarse) and (not l in fine)])
