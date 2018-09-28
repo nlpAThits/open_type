@@ -17,7 +17,7 @@ TYPE_ROOT = '/home/lopezfo/projects/open_type/resources/'
 GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/fooglove.txt'
 EXP_ROOT = '/hits/basement/nlp/lopezfo/out/opentype/'
 
-ANSWER_NUM_DICT = {"open": 2339, "onto":89, "wiki": 4600, "kb":120, "gen":8}
+ANSWER_NUM_DICT = {"open": 2323, "onto":89, "wiki": 4600, "kb":120, "gen":8}
 
 # WARNING! The type file has to be ordered following the hierarchy:
 # [ General types : Fine types : Ultra-fined types ]
