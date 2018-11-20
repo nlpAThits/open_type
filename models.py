@@ -75,7 +75,7 @@ class Model(nn.Module):
     fine_target_sum = torch.sum(fine_targets, 1)
     
     if torch.sum(gen_target_sum.data) > 0:  # Calculates the loss for the general
-
+      embed()
       gen_mask = torch.squeeze(torch.nonzero(torch.min(gen_target_sum.data, comparison_tensor)), dim=1)
       gen_logit_masked = logits[:, :gen_cutoff][gen_mask, :]
       gen_target_masked = gen_targets[gen_mask]
