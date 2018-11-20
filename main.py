@@ -102,8 +102,8 @@ def _train(args):
                               (dev_fname, 'dev', args.goal),
                               (test_fname, 'test', args.goal)], args)
     train_gen_list = [(args.goal, data_gens[0])]
-    val_gen_list = [(args.goal, data_gens[1])]
-    test_gen_list = [(args.goal, data_gens[2])]
+    val_gen_list = data_gens[1]
+    test_gen_list = data_gens[2]
   train_log = SummaryWriter(os.path.join(constant.EXP_ROOT, args.model_id, "log", "train"))
   validation_log = SummaryWriter(os.path.join(constant.EXP_ROOT, args.model_id, "log", "validation"))
   tensorboard = TensorboardWriter(train_log, validation_log)

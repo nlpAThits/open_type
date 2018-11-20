@@ -205,7 +205,7 @@ class SelfAttentiveSum(nn.Module):
     self.key_rel = nn.ReLU()
     self.hidden_dim = hidden_dim
     self.key_output = nn.Linear(hidden_dim, 1, bias=False)
-    self.key_softmax = nn.Softmax()
+    self.key_softmax = nn.Softmax(dim=1)
 
   def forward(self, input_embed):
     input_embed_squeezed = input_embed.view(-1, input_embed.size()[2])
