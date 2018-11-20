@@ -43,7 +43,7 @@ class TensorboardWriter:
 
 
 def get_data_gen(dataname, mode, args, vocab_set, goal):
-  dataset = data_utils.TypeDataset(constant.FILE_ROOT + dataname, lstm_type=args.lstm_type,
+  dataset = data_utils.TypeDataset("/hits/basement/nlp/lopezfo/views/ultra_ontonotes/" + dataname, lstm_type=args.lstm_type,
                                      goal=goal, vocab=vocab_set)
   if mode == 'train':
     data_gen = dataset.get_batch(args.batch_size, args.num_epoch, forever=False, eval_data=False,
@@ -97,10 +97,13 @@ def _train(args):
   else:
     train_fname = args.train_data
     dev_fname = args.dev_data
+    test_fname = args.eval_data
     data_gens = get_datasets([(train_fname, 'train', args.goal),
-                              (dev_fname, 'dev', args.goal)], args)
+                              (dev_fname, 'dev', args.goal),
+                              (test_fname, 'test', args.goal)], args)
     train_gen_list = [(args.goal, data_gens[0])]
     val_gen_list = [(args.goal, data_gens[1])]
+    test_gen_list = [(args.goal, data_gens[2])]
   train_log = SummaryWriter(os.path.join(constant.EXP_ROOT, args.model_id, "log", "train"))
   validation_log = SummaryWriter(os.path.join(constant.EXP_ROOT, args.model_id, "log", "validation"))
   tensorboard = TensorboardWriter(train_log, validation_log)
@@ -161,32 +164,32 @@ def _train(args):
             evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, args.goal)
 
     # Evaluate Loss on the Turk Dev dataset.
-    if batch_num % args.eval_period == 0 and batch_num > 0 and args.data_setup == 'joint':
+    if batch_num % args.eval_period == 0 and batch_num > 0:
 
       mylog.info('---- Eval on Dev at step {0:d} ---'.format(batch_num))
-      feed_dict = next(crowd_dev_gen)   # batch size == full crowd dev set
+      feed_dict = next(val_gen_list)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
-      gold_and_pred_dev = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+      gold_and_pred_dev = evaluate_batch(batch_num, eval_batch, model, tensorboard, "onto", args.goal)
 
       figet_eval = get_figet_evaluation_str(gold_and_pred_dev)
       mylog.info("\nFiget Total Evaluation on Dev for {}\n{}\n".format(args.goal, figet_eval))
 
-      mylog.info("Evaluate stratified:")
-      eval_stratified(gold_and_pred_dev)
+      # mylog.info("Evaluate stratified:")
+      # eval_stratified(gold_and_pred_dev)
 
 
     # Evaluate on TEST
-    if batch_num % args.eval_period * 10 == 0 and batch_num > 0 and args.data_setup == 'joint':
+    if batch_num % args.eval_period * 10 == 0 and batch_num > 0:
       mylog.info('---- Eval on Test at step {0:d} ---'.format(batch_num))
-      feed_dict = next(crowd_test_gen)   # batch size == full crowd dev set
+      feed_dict = next(test_gen_list)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
-      gold_and_pred_test = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+      gold_and_pred_test = evaluate_batch(batch_num, eval_batch, model, tensorboard, "onto", args.goal)
 
       figet_eval = get_figet_evaluation_str(gold_and_pred_test)
       mylog.info("\nFiget Total Evaluation on Test for {}\n{}\n".format(args.goal, figet_eval))
 
-      mylog.info("Evaluate stratified:")
-      eval_stratified(gold_and_pred_test)
+      # mylog.info("Evaluate stratified:")
+      # eval_stratified(gold_and_pred_test)
 
 
     if batch_num % args.save_period == 0 and batch_num > 0:
