@@ -2,9 +2,9 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("model_id", help="Identifier for model")
 # Data
-parser.add_argument("-train_data", help="Train data", default="augmented_train.json") # Here I should change for the reduce train set and the hard test set
+parser.add_argument("-train_data", help="Train data", default="subtrain.jsonl") # Here I should change for the reduce train set and the hard test set
 parser.add_argument("-dev_data", help="Dev data", default="g_dev.json")
-parser.add_argument("-eval_data", help="Test data", default="g_test.json")
+parser.add_argument("-eval_data", help="Test data", default="hard_test.jsonl")
 parser.add_argument("-num_epoch", help="The number of epoch", default=5000, type=int)
 parser.add_argument("-batch_size", help="The batch size", default=1000, type=int)
 parser.add_argument("-eval_batch_size", help="The batch size", default=8963, type=int) # 1998

@@ -52,7 +52,7 @@ def get_data_gen(dataname, mode, args, vocab_set, goal):
     data_gen = dataset.get_batch(args.eval_batch_size, 1, forever=True, eval_data=True,
                                  simple_mention=not args.enhanced_mention)
   else:
-    data_gen = dataset.get_batch(args.eval_batch_size, 1, forever=False, eval_data=True,
+    data_gen = dataset.get_batch(args.eval_batch_size, 1, forever=True, eval_data=True,
                                  simple_mention=not args.enhanced_mention)
   return data_gen
 
