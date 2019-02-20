@@ -11,19 +11,19 @@ def load_vocab_dict(vocab_file_name, vocab_max_size=None, start_vocab_count=None
       file_content = dict(zip(text, range(0, len(text))))
   return file_content
 
-FILE_ROOT = '/hits/basement/nlp/lopezfo/views/ok_ultra_for_opentype/'
+FILE_ROOT = '/hits/basement/nlp/lopezfo/views/opentype_benultra/'
 TYPE_ROOT = '/home/lopezfo/projects/open_type/resources/'
 # GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/glove.840B.300d.txt'
 GLOVE_VEC = '/hits/basement/nlp/lopezfo/data/embeddings/fooglove.txt'
-EXP_ROOT = '/hits/basement/nlp/lopezfo/out/opentype/'
+EXP_ROOT = '/hits/basement/nlp/lopezfo/out/opentype/benultra/'
 
-ANSWER_NUM_DICT = {"open": 2323, "onto":89, "wiki": 4600, "kb":120, "gen":8}
+ANSWER_NUM_DICT = {"open": 10049, "onto": 89, "wiki": 4600, "kb": 128, "gen": 9}
 
 # WARNING! The type file has to be ordered following the hierarchy:
 # [ General types : Fine types : Ultra-fined types ]
-KB_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt", 120)
-WIKI_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt", 4600)
-ANSWER_VOCAB = load_vocab_dict(TYPE_ROOT + "/wordnet_manual_ok_types.txt")
+KB_VOCAB = load_vocab_dict(TYPE_ROOT + "/benultra_types.txt", 128)
+WIKI_VOCAB = load_vocab_dict(TYPE_ROOT + "/benultra_types.txt", 4600)
+ANSWER_VOCAB = load_vocab_dict(TYPE_ROOT + "/benultra_types.txt")
 ONTO_ANS_VOCAB = load_vocab_dict('/hits/basement/nlp/lopezfo/data/ultrafine/release/ontology/onto_ontology.txt')
 ANS2ID_DICT = {"open": ANSWER_VOCAB, "wiki": WIKI_VOCAB, "kb": KB_VOCAB, "onto":ONTO_ANS_VOCAB}
 
@@ -38,6 +38,6 @@ LABEL = label_string("HEAD", "WIKI", "KB")
 
 CHAR_DICT = defaultdict(int)
 char_vocab = [u"<unk>"]
-with open(FILE_ROOT + "/ontology/char_vocab.english.txt") as f:
+with open("/hits/basement/nlp/lopezfo/views/ultra_ontonotes/ontology/char_vocab.english.txt") as f:
   char_vocab.extend(c.strip() for c in f.readlines())
   CHAR_DICT.update({c: i for i, c in enumerate(char_vocab)})

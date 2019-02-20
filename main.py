@@ -147,8 +147,9 @@ def _train(args):
         logging.info(train_loss_str)
         tensorboard.add_train_scalar('train_loss_' + type_name, cur_loss, batch_num)
 
+      # measures TRAIN accuracy
       if batch_num % args.eval_period == 0 and batch_num > 0:
-        output_index = get_output_index(output_logits)
+        output_index = get_output_index(output_logits, args.precision_at)
         gold_pred_train = get_gold_pred_str(output_index, batch['y'].data.cpu().clone(), args.goal)
         accuracy = sum([set(y) == set(yp) for y, yp in gold_pred_train]) * 1.0 / len(gold_pred_train)
         train_acc_str = '{1:s} Train accuracy: {0:.1f}%'.format(accuracy * 100, type_name)
@@ -158,15 +159,15 @@ def _train(args):
         for (val_type_name, val_data_gen) in val_gen_list:
           if val_type_name == type_name:
             eval_batch, _ = to_torch(next(val_data_gen))
-            evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, args.goal)
+            evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, args.goal, args.precision_at)
 
-    # Evaluate Loss on the Turk Dev dataset.
+    # Evaluate on DEV
     if batch_num % args.eval_period == 0 and batch_num > 0 and args.data_setup == 'joint':
 
       mylog.info('---- Eval on Dev at step {0:d} ---'.format(batch_num))
       feed_dict = next(crowd_dev_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
-      gold_and_pred_dev = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+      gold_and_pred_dev = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal, args.precision_at)
 
       figet_eval = get_figet_evaluation_str(gold_and_pred_dev)
       mylog.info("\nFiget Total Evaluation on Dev for {}\n{}\n".format(args.goal, figet_eval))
@@ -176,11 +177,11 @@ def _train(args):
 
 
     # Evaluate on TEST
-    if batch_num % args.eval_period * 10 == 0 and batch_num > 0 and args.data_setup == 'joint':
+    if batch_num % args.eval_period == 0 and batch_num > 0 and args.data_setup == 'joint':
       mylog.info('---- Eval on Test at step {0:d} ---'.format(batch_num))
       feed_dict = next(crowd_test_gen)   # batch size == full crowd dev set
       eval_batch, _ = to_torch(feed_dict)
-      gold_and_pred_test = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal)
+      gold_and_pred_test = evaluate_batch(batch_num, eval_batch, model, tensorboard, "open", args.goal, args.precision_at)
 
       figet_eval = get_figet_evaluation_str(gold_and_pred_test)
       mylog.info("\nFiget Total Evaluation on Test for {}\n{}\n".format(args.goal, figet_eval))
@@ -199,10 +200,10 @@ def _train(args):
              '{0:s}/{1:s}.pt'.format(constant.EXP_ROOT, args.model_id))
 
 
-def evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, goal):
+def evaluate_batch(batch_num, eval_batch, model, tensorboard, val_type_name, goal, precision_at):
   model.eval()
   loss, output_logits = model(eval_batch, val_type_name)
-  output_index = get_output_index(output_logits)
+  output_index = get_output_index(output_logits, precision_at)
   eval_loss = loss.data.cpu().clone()[0]
   eval_loss_str = 'Eval loss: {0:.7f} at step {1:d}'.format(eval_loss, batch_num)
   gold_pred = get_gold_pred_str(output_index, eval_batch['y'].data.cpu().clone(), goal) # list of strings with [(list_of_pred_types, list_of_gold_types)]
@@ -263,7 +264,7 @@ def _test(args):
     for batch_num, batch in enumerate(dataset):
       eval_batch, annot_ids = to_torch(batch)
       loss, output_logits = model(eval_batch, args.goal)
-      output_index = get_output_index(output_logits)
+      output_index = get_output_index(output_logits, args.precision_at)
       output_prob = model.sigmoid_fn(output_logits).data.cpu().clone().numpy()
       y = eval_batch['y'].data.cpu().clone().numpy()
       gold_pred = get_gold_pred_str(output_index, y, args.goal)

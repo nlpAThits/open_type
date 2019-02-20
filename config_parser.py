@@ -12,6 +12,7 @@ parser.add_argument("-goal", help="Limiting vocab to smaller vocabs (either onto
                     choices=["open", "onto", "wiki", 'kb'])
 parser.add_argument("-seed", help="Pytorch random Seed", default=1888)
 parser.add_argument("-gpu", help="Using gpu or cpu", default=False, action="store_true")
+parser.add_argument("-precision_at", help="k to evaluate precision at", default=5)
 
 # learning
 parser.add_argument("-mode", help="Whether to train or test", default="train", choices=["train", "test"])
@@ -34,7 +35,7 @@ parser.add_argument("-lstm_type", default="two", choices=["two", "single"])
 parser.add_argument("-dim_hidden", help="The number of hidden dimension.", default=100, type=int)
 parser.add_argument("-rnn_dim", help="The number of RNN dimension.", default=100, type=int)
 # Save / log related
-parser.add_argument("-save_period", help="How often to save", default=1000, type=int)
+parser.add_argument("-save_period", help="How often to save", default=10000, type=int)
 parser.add_argument("-eval_period", help="How often to run dev", default=500, type=int)
 parser.add_argument("-log_period", help="How often to save", default=1000, type=int)
 

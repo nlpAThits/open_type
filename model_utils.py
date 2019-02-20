@@ -74,9 +74,9 @@ def stratify(labels):
           [l for l in labels if (l not in coarse) and (l not in fine)])
 
 
-def get_output_index(outputs):
+def get_output_index(outputs, k):
   """
-  Given outputs from the decoder, generate prediction index.
+  Given outputs from the decoder, generate prediction index taking the k most likely.
   :param outputs: batch x type_amount
   :return: pred_idx <list>: of len 'batch' with the ids of the predicted types
   """
@@ -84,11 +84,8 @@ def get_output_index(outputs):
   outputs = sigmoid_fn(outputs).data.cpu().clone()
   for single_dist in outputs:
     single_dist = single_dist.numpy()
-    arg_max_ind = np.argmax(single_dist)
-    pred_id = [arg_max_ind]
-    pred_id.extend(
-      [i for i in range(len(single_dist)) if single_dist[i] > 0.5 and i != arg_max_ind])
-    pred_idx.append(pred_id)
+    arg_max_ind = single_dist.argsort()[-k:][::-1]
+    pred_idx.append(arg_max_ind.tolist())
   return pred_idx
 
 
@@ -205,7 +202,7 @@ class SelfAttentiveSum(nn.Module):
     self.key_rel = nn.ReLU()
     self.hidden_dim = hidden_dim
     self.key_output = nn.Linear(hidden_dim, 1, bias=False)
-    self.key_softmax = nn.Softmax()
+    self.key_softmax = nn.Softmax(dim=1)
 
   def forward(self, input_embed):
     input_embed_squeezed = input_embed.view(-1, input_embed.size()[2])
