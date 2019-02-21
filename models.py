@@ -69,17 +69,18 @@ class Model(nn.Module):
       gen_cutoff, fine_cutoff, final_cutoff = constant.ANSWER_NUM_DICT['gen'], constant.ANSWER_NUM_DICT['kb'], None
     loss = 0.0
     comparison_tensor = torch.Tensor([1.0]).cuda()
-    gen_targets = targets[:, :gen_cutoff]
-    fine_targets = targets[:, gen_cutoff:fine_cutoff]
-    gen_target_sum = torch.sum(gen_targets, 1)
-    fine_target_sum = torch.sum(fine_targets, 1)
+    gen_targets = targets[:, :gen_cutoff]   # batch x len(COARSE)
+    fine_targets = targets[:, gen_cutoff:fine_cutoff]   # batch x len(FINE)
+    gen_target_sum = torch.sum(gen_targets, 1)      # puts a 1 on the rows that have at least one COARSE
+    fine_target_sum = torch.sum(fine_targets, 1)    # puts a 1 on the rows that have at least one FINE
     
     if torch.sum(gen_target_sum.data) > 0:  # Calculates the loss for the general
 
-      gen_mask = torch.squeeze(torch.nonzero(torch.min(gen_target_sum.data, comparison_tensor)), dim=1)
-      gen_logit_masked = logits[:, :gen_cutoff][gen_mask, :]
-      gen_target_masked = gen_targets[gen_mask]
+      gen_mask = torch.squeeze(torch.nonzero(torch.min(gen_target_sum.data, comparison_tensor)), dim=1) # list of indexes with at least one COARSE
+      gen_logit_masked = logits[:, :gen_cutoff][gen_mask, :]    # len(at least one coarse) x len(COARSE)
+      gen_target_masked = gen_targets[gen_mask]                 # idem previous
       gen_loss = self.loss_func(gen_logit_masked, gen_target_masked)
+      # embed()
       loss += gen_loss 
     if torch.sum(fine_target_sum.data) > 0:
       fine_mask = torch.squeeze(torch.nonzero(torch.min(fine_target_sum.data, comparison_tensor)), dim=1)

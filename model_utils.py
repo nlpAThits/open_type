@@ -9,6 +9,7 @@ import eval_metric
 sys.path.insert(0, './resources')
 import constant
 import logging
+from IPython import embed
 
 sigmoid_fn = nn.Sigmoid()
 
@@ -93,12 +94,13 @@ def get_output_index(outputs, k):
     row_pred = []
     for j, out_gran in enumerate(outs):
       single_dist = out_gran[i].numpy()
-      arg_max_ind = single_dist.argsort()[-k:][::-1].tolist()
+      arg_max_ind = single_dist.argsort()[-k:][::-1]
       
-      offset = offsets[j]
-      plus_offset = [offset + elem for elem in arg_max_ind]
-      row_pred.append(plus_offset)
+      plus_offset = (arg_max_ind + offsets[j]).tolist()
+      row_pred.extend(plus_offset)
 
+      if i == 0: embed()
+    
     predicted_ids.append(row_pred)
 
   return predicted_ids
