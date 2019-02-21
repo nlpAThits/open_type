@@ -80,13 +80,28 @@ def get_output_index(outputs, k):
   :param outputs: batch x type_amount
   :return: pred_idx <list>: of len 'batch' with the ids of the predicted types
   """
-  pred_idx = []
+  predicted_ids = []
+  gen_cutoff, fine_cutoff = constant.ANSWER_NUM_DICT['gen'], constant.ANSWER_NUM_DICT['kb']
   outputs = sigmoid_fn(outputs).data.cpu().clone()
-  for single_dist in outputs:
-    single_dist = single_dist.numpy()
-    arg_max_ind = single_dist.argsort()[-k:][::-1]
-    pred_idx.append(arg_max_ind.tolist())
-  return pred_idx
+  out_coarse = outputs[:, :gen_cutoff]
+  out_fine = outputs[:, gen_cutoff:fine_cutoff]
+  out_uf = outputs[:, fine_cutoff:]
+  outs = [out_coarse, out_fine, out_uf]
+  offsets = [0, gen_cutoff, fine_cutoff]
+
+  for i in range(len(outputs)):
+    row_pred = []
+    for j, out_gran in enumerate(outs):
+      single_dist = out_gran[i].numpy()
+      arg_max_ind = single_dist.argsort()[-k:][::-1].tolist()
+      
+      offset = offsets[j]
+      plus_offset = [offset + elem for elem in arg_max_ind]
+      row_pred.append(plus_offset)
+
+    predicted_ids.append(row_pred)
+
+  return predicted_ids
 
 
 def get_gold_pred_str(pred_idx, gold, goal):
