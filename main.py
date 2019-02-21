@@ -63,23 +63,15 @@ def get_joint_datasets(args):
   valid_gen_list = []
   if args.mode == 'train':
     if not args.remove_open and not args.only_crowd:
-      train_gen_list.append(
-        #`("open", get_data_gen('train/open*.json', 'train', args, vocab, "open")))
-        ("open", get_data_gen('distant_supervision/headword_train.json', 'train', args, vocab, "open")))
+      train_gen_list.append(("open", get_data_gen('distant_supervision/headword_train.json', 'train', args, vocab, "open")))
       valid_gen_list.append(("open", get_data_gen('distant_supervision/headword_dev.json', 'dev', args, vocab, "open")))
     if not args.remove_el and not args.only_crowd:
-      valid_gen_list.append(
-        ("wiki",
-         get_data_gen('distant_supervision/el_dev.json', 'dev', args, vocab, "wiki" if args.multitask else "open")))
-      train_gen_list.append(
-        ("wiki",
-         get_data_gen('distant_supervision/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
-         #get_data_gen('train/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
+      valid_gen_list.append(("wiki",get_data_gen('distant_supervision/el_dev.json', 'dev', args, vocab, "wiki" if args.multitask else "open")))
+      train_gen_list.append(("wiki",get_data_gen('distant_supervision/el_train.json', 'train', args, vocab, "wiki" if args.multitask else "open")))
     if args.add_crowd or args.only_crowd:
-      train_gen_list.append(
-        ("open", get_data_gen('crowd/train_m.jsonl', 'train', args, vocab, "open")))
-  crowd_dev_gen = get_data_gen('crowd/dev.jsonl', 'dev', args, vocab, "open")
-  crowd_test_gen = get_data_gen('crowd/test.jsonl', 'dev', args, vocab, "open")
+      train_gen_list.append(("open", get_data_gen('crowd/train_m.json', 'train', args, vocab, "open")))
+  crowd_dev_gen = get_data_gen('crowd/dev.json', 'dev', args, vocab, "open")
+  crowd_test_gen = get_data_gen('crowd/test.json', 'dev', args, vocab, "open")
   return train_gen_list, valid_gen_list, crowd_dev_gen, crowd_test_gen
 
 
