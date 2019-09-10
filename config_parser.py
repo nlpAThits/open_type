@@ -12,7 +12,7 @@ parser.add_argument("-goal", help="Limiting vocab to smaller vocabs (either onto
                     choices=["open", "onto", "wiki", 'kb'])
 parser.add_argument("-seed", help="Pytorch random Seed", default=1888)
 parser.add_argument("-gpu", help="Using gpu or cpu", default=False, action="store_true")
-parser.add_argument("-precision_at", help="k to evaluate precision at", default=5)
+parser.add_argument("-precision_at", help="k to evaluate precision at", default=2)
 
 # learning
 parser.add_argument("-mode", help="Whether to train or test", default="train", choices=["train", "test"])

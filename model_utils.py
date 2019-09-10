@@ -97,9 +97,7 @@ def get_output_index(outputs, k):
       arg_max_ind = single_dist.argsort()[-k:][::-1]
       
       plus_offset = (arg_max_ind + offsets[j]).tolist()
-      row_pred.extend(plus_offset)
-
-      if i == 0: embed()
+      row_pred.extend(plus_offset) 
     
     predicted_ids.append(row_pred)
 
